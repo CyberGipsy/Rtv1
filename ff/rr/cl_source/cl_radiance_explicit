@@ -1,16 +1,16 @@
-static RT_F4		radiance_explicit(
+static float3		radiance_explicit(
 					constant t_scene *scene,
 					t_intersection *intersection_object,
 					global ulong *rng_state)
 {
 	t_intersection	intersection_light;
-	RT_F4			radiance;
-	RT_F4			light_position;
-	RT_F4			light_direction;
-	RT_F			emission_intensity;
-	RT_F			cos_a_max;
-	RT_F			omega;
-	RT_F			sphere_radius;
+	float3			radiance;
+	float3			light_position;
+	float3			light_direction;
+	float			emission_intensity;
+	float			cos_a_max;
+	float			omega;
+	float			sphere_radius;
 
 	radiance = 0;
 	for (int i = 0; i < scene->objects_length; i++)

@@ -88,3 +88,35 @@ unsigned int ParallelRNG3( unsigned int x,  unsigned int y,  unsigned int z )
 
 	return value;
 }
+
+
+static float			rng_lgc(global ulong *rng_state)
+{
+	int				gi;
+	ulong			x;
+
+	gi = get_global_id(0);
+	x = rng_state[gi];
+	x = (0x5DEECE66DL * x + 0xBL) & ((1L << 48) - 1);
+	rng_state[gi] = x;
+    return ((float)x / (1L << 48));
+}
+
+static float			rng_xor(global ulong *rng_state)
+{
+	int				gi;
+	ulong			x;
+
+	gi = get_global_id(0);
+	x = rng_state[gi];
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 17;
+	rng_state[gi] = x;
+    return (x / 4294967296.0f);
+}
+
+static float			rng(global ulong *rng_state)
+{
+	return (rng_lgc(rng_state));
+}

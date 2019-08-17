@@ -12,7 +12,30 @@ typedef struct Ray
 {
 	float3 origin;
 	float3 dir;
+	float  t;
 } Ray;
+
+typedef struct 		s_material
+{
+	float3			color;
+	float3			emission;
+}					t_material;
+
+typedef	struct		s_ray
+{
+	float3			origin;
+	float3			direction;
+	float 			t;
+}					t_ray;
+
+typedef struct		s_intersection
+{
+	t_ray			ray;
+	float3			hit;
+	float3			normal;
+	t_material		material;
+	int 			object_id;
+}					t_intersection;
 
 typedef enum e_figure
 {
@@ -30,6 +53,16 @@ typedef struct Object{
 	float reflection;
 	float plane_d;
 } t_obj;
+typedef struct 		s_camera
+{
+	float3			position;
+	float3			axis_x;
+	float3			axis_y;
+	float3			axis_z;
+	float3			forward;
+	int				width;
+	int				height;
+}					t_camera;
 
 typedef struct		s_cam
 {
