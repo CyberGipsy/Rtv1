@@ -4,6 +4,8 @@
  #include "intersect.cl"
  #include "camera.cl"
 
+# define RT_1_PI		(float)0.318309886183790671537767526745028724
+# define RT_PI			(float)3.14159265358979323846264338327950288
 // // typedef struct s_camera
 // // {
 // // 	cl_float3 position;
@@ -529,57 +531,54 @@ static float3					sphere_random(constant t_obj *object, int samples)
 	return (random);
 }
 
+static float3		radiance_explicit(
+					int obj_count,
+					__constant t_obj* objects,
+					t_intersection *intersection_obj,
+					global ulong *rng_state)
+{
+	t_intersection	intersection_light;
+	float3			radiance;
+	float3			light_position;
+	float3			light_direction;
+	float			emission_intensity;
+	float			cos_a_max;
+	float			omega;
+	float			sphere_radius;
 
+	radiance = 0;
+	for (int i = 0; i < obj_count; i++)
+	{
+		if (i == intersection_obj->object_id)
+			continue ;
+		if (objects[i].type != SPHERE)
+			continue ;
+		if (f4_max_component(objects[i].emission) == 0.f)
+			continue ;
 
-// static float3		radiance_explicit(
-// 					constant t_scene *scene,
-// 					t_intersection *intersection_object,
-// 					global ulong *rng_state)
-// {
-// 	t_intersection	intersection_light;
-// 	float3			radiance;
-// 	float3			light_position;
-// 	float3			light_direction;
-// 	float			emission_intensity;
-// 	float			cos_a_max;
-// 	float			omega;
-// 	float			sphere_radius;
+		light_position = sphere_random(objects + i, rng_state);
+		light_direction = normalize(light_position - intersection_obj->hit);
 
-// 	radiance = 0;
-// 	for (int i = 0; i < scene->objects_length; i++)
-// 	{
-// 		if (i == intersection_object->object_id)
-// 			continue ;
-// 		if (scene->objects[i].type != object_sphere)
-// 			continue ;
-// 		if (f4_max_component(scene->objects[i].material.emission) == 0.f)
-// 			continue ;
+		intersection_light.ray.origin = intersection_obj->hit;
+		intersection_light.ray.direction = light_direction;
+		intersection_reset(&intersection_light);
 
-// 		light_position = sphere_random(scene->objects + i, rng_state);
-// 		light_direction = normalize(light_position - intersection_object->hit);
+		if (!intersect_scene(objects, obj_count, intersection_obj))
+			continue ;
+		if (intersection_light.object_id != i)
+			continue ;
 
-// 		intersection_light.ray.origin = intersection_object->hit;
-// 		intersection_light.ray.direction = light_direction;
-// 		intersection_reset(&intersection_light);
+		emission_intensity = dot(intersection_obj->normal, intersection_light.ray.direction);
+		if (emission_intensity < 0.00001f)
+			continue ;
 
-// 		if (!scene_intersect(scene, &intersection_light))
-// 			continue ;
-// 		if (intersection_light.object_id != i)
-// 			continue ;
-
-// 		emission_intensity = dot(intersection_object->normal, intersection_light.ray.direction);
-// 		if (emission_intensity < 0.00001f)
-// 			continue ;
-
-// 		sphere_radius = ((t_object_sphere *)scene->objects[intersection_light.object_id].data)->radius;
-// 		cos_a_max = RT_SQRT(1.f - (sphere_radius * sphere_radius) / length(intersection_object->hit - light_position));
-// 		omega = 2 * RT_PI * (1.f - cos_a_max);
-// 		radiance += scene->objects[i].material.emission * emission_intensity * omega * RT_1_PI;
-// 	}
-// 	return (radiance);
-// }
-
-
+		sphere_radius = objects[intersection_light.object_id].radius;
+		cos_a_max = RT_SQRT(1.f - (sphere_radius * sphere_radius) / length(intersection_obj->hit - light_position));
+		omega = 2 * RT_PI * (1.f - cos_a_max);
+		radiance += objects[i].emission * emission_intensity * omega * RT_1_PI;
+	}
+	return (radiance);
+}
 
 static float3		radiance_add(
 					int sphere_count,
