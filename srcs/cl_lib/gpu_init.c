@@ -107,7 +107,7 @@ int bind_data(t_gpu *gpu, t_game *game)
 	ERROR(gpu->err == 0);
 	gpu->err |= clSetKernelArg(gpu->kernel, 7, sizeof(cl_mem), &gpu->cl_cpu_random);
 	ERROR(gpu->err == 0);
-  gpu->err |= clSetKernelArg(gpu->kernel, 8, sizeof(cl_mem), &textures);
+	gpu->err |= clSetKernelArg(gpu->kernel, 8, sizeof(cl_mem), &textures);
 	ERROR(gpu->err == 0);
 	gpu->err |= clSetKernelArg(gpu->mouse_kernel, 2, sizeof(cl_mem), &gpu->cl_cpuSpheres);
 	gpu->err |= clSetKernelArg(gpu->mouse_kernel, 3, sizeof(cl_int), &n_spheres);
@@ -147,7 +147,7 @@ cl_float3 create_cfloat3 (float x, float y, float z)
 	return re;
 }
 
-void initScene(t_obj* cpu_spheres, t_game *game)
+void init_scene(t_obj* cpu_spheres, t_game *game)
 {
 	char						*name = "sviborg.bmp";
 	char						*secname = "sun.bmp";
@@ -171,7 +171,7 @@ void initScene(t_obj* cpu_spheres, t_game *game)
 	cpu_spheres[0].emission 	= create_cfloat3 (0.0f, 0.0f, 0.0f);
 	cpu_spheres[0].type 		= CYLINDER;
 	cpu_spheres[0].reflection 	= 0.f;
-	cpu_spheres[0].texture 		= 3;
+	cpu_spheres[0].texture 		= 0;
 
 	// right sphere
 	cpu_spheres[1].radius   	= 0.16f;
@@ -180,7 +180,7 @@ void initScene(t_obj* cpu_spheres, t_game *game)
 	cpu_spheres[1].emission 	= create_cfloat3 (0.0f, 0.0f, 0.0f);
 	cpu_spheres[1].v 			= create_cfloat3 (0.0f, 0.0f, 0.0f);
 	cpu_spheres[1].type 		= SPHERE;
-	cpu_spheres[1].texture 		= 1;
+	cpu_spheres[1].texture 		= 0;
 	cpu_spheres[1].reflection 	= 0.f;
 
 	// lightsource
@@ -190,7 +190,7 @@ void initScene(t_obj* cpu_spheres, t_game *game)
 	cpu_spheres[2].emission 	= create_cfloat3 (40.0f, 40.0f, 40.0f);
 	cpu_spheres[2].type 		= SPHERE;
 	cpu_spheres[2].reflection 	= 0;
-	cpu_spheres[2].texture 		= 2;
+	cpu_spheres[2].texture 		= 4;
 
 		// left wall
 	cpu_spheres[6].radius		= 200.0f;
@@ -220,7 +220,7 @@ void initScene(t_obj* cpu_spheres, t_game *game)
 	cpu_spheres[8].v 			= create_cfloat3 (0.0f, -1.0f, 0.0f);
 	cpu_spheres[8].type 		= PLANE;
 	cpu_spheres[8].reflection	= 0;
-	cpu_spheres[8].texture 		= 4;
+	cpu_spheres[8].texture 		= 0;
 	// ceiling
 	cpu_spheres[3].radius		= 200.0f;
 	cpu_spheres[3].position 	= create_cfloat3 (0.0f, -0.5f, 0.0f);
@@ -229,7 +229,7 @@ void initScene(t_obj* cpu_spheres, t_game *game)
 	cpu_spheres[3].v 			= create_cfloat3 (0.0f, 1.0f, 0.0f);
 	cpu_spheres[3].type 		= PLANE;
 	cpu_spheres[3].reflection 	= 0;
-	cpu_spheres[3].texture 		= 5;
+	cpu_spheres[3].texture 		= 0;
 
 
 	// back wall
@@ -241,7 +241,7 @@ void initScene(t_obj* cpu_spheres, t_game *game)
 	cpu_spheres[4].type 		= PLANE;
  	cpu_spheres[4].reflection 	= 0;
 	cpu_spheres[4].reflection 	= 0;
-	cpu_spheres[4].texture 		= 4;
+	cpu_spheres[4].texture 		= 0;
 
 
 	// front wall 
@@ -257,36 +257,36 @@ void initScene(t_obj* cpu_spheres, t_game *game)
 
 int opencl_init(t_gpu *gpu, t_game *game)
 {
-  int     i;
+	int     i;
 
-  i = -1;
-  gpu->err = clGetPlatformIDs(0, NULL, &gpu->numPlatforms);
-  if (gpu->numPlatforms == 0)
-      return (EXIT_FAILURE);
-  cl_platform_id Platform[gpu->numPlatforms];
-  gpu->err = clGetPlatformIDs(gpu->numPlatforms, Platform, NULL);
-  while (++i < gpu->numPlatforms)
-  {
-      gpu->err = clGetDeviceIDs(Platform[i], DEVICE, 1, &gpu->device_id, NULL);
-      if (gpu->err == CL_SUCCESS)
-          break;
-  }
-  if (gpu->device_id == NULL)
-      return (1);
-  gpu->context = clCreateContext(0, 1, &gpu->device_id, NULL, NULL, &gpu->err);
-  gpu->commands = clCreateCommandQueue(gpu->context, gpu->device_id, 0, &gpu->err);
+	i = -1;
+	gpu->err = clGetPlatformIDs(0, NULL, &gpu->numPlatforms);
+	if (gpu->numPlatforms == 0)
+		return (EXIT_FAILURE);
+	cl_platform_id Platform[gpu->numPlatforms];
+	gpu->err = clGetPlatformIDs(gpu->numPlatforms, Platform, NULL);
+	while (++i < gpu->numPlatforms)
+	{
+		gpu->err = clGetDeviceIDs(Platform[i], DEVICE, 1, &gpu->device_id, NULL);
+		if (gpu->err == CL_SUCCESS)
+			break;
+	}
+	if (gpu->device_id == NULL)
+		return (1);
+	gpu->context = clCreateContext(0, 1, &gpu->device_id, NULL, NULL, &gpu->err);
+	gpu->commands = clCreateCommandQueue(gpu->context, gpu->device_id, 0, &gpu->err);
 
-  gpu_read_kernel(gpu);
+  	gpu_read_kernel(gpu);
 	gpu->kernel = clCreateKernel(gpu->program, "render_kernel", &gpu->err);
 	gpu->mouse_kernel = clCreateKernel(gpu->program, "intersect_mouse", &gpu->err);
 	gpu->cpuOutput = malloc(sizeof(int) * (WIN_H * WIN_H));
 	gpu->spheres = malloc(sizeof(t_obj) * 9);
-	gpu->samples = 0;
-  gpu->active_mouse_move = 0;
+	gpu->samples = 15;
+  	gpu->active_mouse_move = 0;
 
-	initScene(gpu->spheres, game);
+	init_scene(gpu->spheres, game);
 	bind_data(gpu, game);
-  return (gpu->err);
+	return (gpu->err);
 }
 
 int		get_mouse_intersection(t_gpu *gpu, int x, int y)

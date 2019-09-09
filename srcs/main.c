@@ -176,14 +176,7 @@ void ft_update(t_game *game)
 				ft_render(game);
 				ft_surface_present(game->sdl, game->sdl->surface);
 			}
-	#ifdef FPS
-				 delta_ticks = clock() - current_ticks; //the time, in ms, that took to render the scene
-    if(delta_ticks > 0)
-        fps = CLOCKS_PER_SEC / delta_ticks;
-		
-			printf("fps :%lu\n", fps);
-	#endif
-	SDL_Delay(200);
+	SDL_Delay(5);
 	}
 }
 
