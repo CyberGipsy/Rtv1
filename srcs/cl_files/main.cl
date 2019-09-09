@@ -271,9 +271,9 @@ __global float3 * vect_temp, int samples, __global ulong * random, __global t_tx
 }
 
 __kernel void intersect_mouse(int x, int y, __global t_obj *objects, int n_objects, int width, int height,
- 								int samples, __global ulong *random, __global int *id)
+ 								int samples, __global ulong *random, __global int *id, __global t_txture *textures)
 {
-	t_scene scene = scene_new(objects, n_objects, width, height, samples, random);
+	t_scene scene = scene_new(objects, n_objects, width, height, samples, random, textures);
 	t_intersection  intersection;
 	intersection.ray = createCamRay(x, y, width, height);
 	*id = (intersect_scene(&scene, &intersection, &(intersection.ray))) ? intersection.object_id : -1;

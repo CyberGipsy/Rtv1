@@ -115,6 +115,8 @@ int bind_data(t_gpu *gpu, t_game *game)
 	gpu->err |= clSetKernelArg(gpu->mouse_kernel, 5, sizeof(cl_int), &h);
 	gpu->err |= clSetKernelArg(gpu->mouse_kernel, 6, sizeof(cl_int), &gpu->samples);
 	gpu->err |= clSetKernelArg(gpu->mouse_kernel, 7, sizeof(cl_mem), &gpu->cl_cpu_random);
+	gpu->err |= clSetKernelArg(gpu->mouse_kernel, 9, sizeof(cl_mem), &textures);
+
 	print_error(gpu);
     //clReleaseMemObject(cl_bufferOut);
     //release_gpu(gpu);
